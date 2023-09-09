@@ -1,9 +1,10 @@
 import express from "express";
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
+import { usersModel } from "./models/Users.js";
+import notificationRouter from "./routes/Notification.js";
 
 const app = express();
 app.use(express.json());
@@ -13,44 +14,15 @@ app.use(
       process.env.FRONTEND_URI,
       "http://localhost:5000",
       "http://localhost:3000",
+      process.env.NOTI_FRONTEND_URI,
     ],
     method: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
   })
 );
-const usersSchema = new mongoose.Schema({
-  firstname: {
-    type: String,
-    required: true,
-  },
-  lastname: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  password: {
-    type: String,
-    select: false,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  profileImageURL: {
-    type: String,
-    default: "profile_images/user_placeholder.png",
-  },
-  tokenCreated: {
-    type: Boolean,
-    default: false,
-  },
-});
-const usersModel = mongoose.model("users", usersSchema);
+// Notification route
+app.use("/notifications",notificationRouter);
+
 // Reset Pwd Mail
 export const sendResetMail = (name, date, from, pass, recipient, sub, link) => {
   // Create a Nodemailer transporter
@@ -150,6 +122,7 @@ const resetpwd = async (req, res) => {
   }
 };
 
+//Routes
 app.get("/", (req, res) => {
   res.send("service online");
 });
