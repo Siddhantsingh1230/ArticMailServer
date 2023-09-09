@@ -90,7 +90,7 @@ const forgotpwd = async (req, res) => {
     email,
     _id: user._id,
   };
-  const token = jwt.sign(payload, secret, { expiresIn: "1m" });
+  const token = jwt.sign(payload, secret, { expiresIn: "15m" });
   const link = `https://articverse.vercel.app/resetpwd/${user._id}/${token}`;
   sendResetMail(
     user.firstname,
