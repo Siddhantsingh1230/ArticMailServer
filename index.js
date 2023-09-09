@@ -112,6 +112,9 @@ const resetpwd = async (req, res) => {
   const secret = "hero" + user.password;
   try {
     const payload = jwt.verify(token, secret);
+    if(!payload){
+        return res.status(404).json({ message: "Invalid Token", success: false });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const updated = await usersModel.findByIdAndUpdate(
       { _id: id },
