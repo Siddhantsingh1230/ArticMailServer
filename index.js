@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
 
 const app = express();
 app.use(express.json());
@@ -90,7 +91,7 @@ export const forgotpwd = async (req, res) => {
     _id: user._id,
   };
   const token = jwt.sign(payload, secret, { expiresIn: "15m" });
-  const link = `https://articverse.vercel.app/resetpwd?id=${user._id}&token=${token}`;
+  const link = `https://articverse.vercel.app/resetpwd/${user._id}/${token}`;
   sendResetMail(
     user.firstname,
     new Date().toLocaleDateString(),
@@ -102,7 +103,29 @@ export const forgotpwd = async (req, res) => {
   );
   res.status(200).json({ success: true, message: "Check your mail" });
 };
-export const resetpwd = async (req, res) => {};
+export const resetpwd = async (req, res) => {
+  const { password, id, token } = req.body;
+  const user = await usersModel.findById({ _id: id });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+  const secret = "hero" + user.password;
+  try {
+    const payload = jwt.verify(token, secret);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updated = await usersModel.updateOne(
+      { _id: id },
+      { $set: { password: hashedPassword } }
+    );
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ message: "Request Failed", success: false });
+    }
+  } catch (error) {
+    return res.status(404).json({ message: error.message, success: false });
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("service online");
