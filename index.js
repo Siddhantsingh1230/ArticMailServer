@@ -45,6 +45,10 @@ const usersSchema = new mongoose.Schema({
     type: String,
     default: "profile_images/user_placeholder.png",
   },
+  tokenCreated: {
+    type: Boolean,
+    default: false,
+  },
 });
 const usersModel = mongoose.model("users", usersSchema);
 // Reset Pwd Mail
@@ -81,7 +85,10 @@ export const sendResetMail = (name, date, from, pass, recipient, sub, link) => {
 };
 const forgotpwd = async (req, res) => {
   const { email } = req.body;
-  const user = await usersModel.findOne({ email });
+  const user = await usersModel.findOneAndUpdate(
+    { email },
+    { $set: { tokenCreated: true } }
+  );
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found!" });
   }
@@ -114,6 +121,9 @@ const resetpwd = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
+  if (user.tokenCreated == false) {
+    return res.status(404).json({ success: false, message: "Token Expired" });
+  }
 
   const secret = process.env.JWT_SECRET_KEY + user.password;
   try {
@@ -126,7 +136,7 @@ const resetpwd = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       const updated = await usersModel.findByIdAndUpdate(
         { _id: id },
-        { $set: { password: hashedPassword } }
+        { $set: { password: hashedPassword, tokenCreated: false } }
       );
       if (!updated) {
         return res
