@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import cors from "cors";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
