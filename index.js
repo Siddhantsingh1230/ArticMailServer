@@ -124,7 +124,7 @@ const resetpwd = async (req, res) => {
 
 //Routes
 app.get("/", (req, res) => {
-  res.send("service online");
+  res.status(200).json({success:true,message:"All Systems Normal"});
 });
 app.post("/forgotpassword", forgotpwd);
 app.post("/resetpassword", resetpwd);
