@@ -38,12 +38,17 @@ export const notifyAll = async (req, res) => {
 };
 export const deleteOld = async (req, res) => {
   try {
-    const currentTime = new Date();
-    const threeHoursAgo = new Date(currentTime - 5 * 60 * 1000); // 5 min
-    const result = await notificationModel.deleteMany({
-      createdAt: { $lt: threeHoursAgo },
-    });
-    res.status(200).json({ success: true, message: "Old Notifications Deleted !" });
+    const length = await notificationModel.countDocuments({});
+    if (length > 0) {
+      const currentTime = new Date();
+      const threeHoursAgo = new Date(currentTime - 5 * 60 * 1000); // 5 min
+      const result = await notificationModel.deleteMany({
+        createdAt: { $lt: threeHoursAgo },
+      });
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "Old Notifications Deleted !" });
   } catch (error) {
     return res
       .status(404)
