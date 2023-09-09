@@ -85,7 +85,7 @@ const forgotpwd = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found!" });
   }
-  const secret = "hero" + user.password;
+  const secret = process.env.JWT_SECRET_KEY + user.password;
   const payload = {
     email,
     _id: user._id,
@@ -105,29 +105,38 @@ const forgotpwd = async (req, res) => {
 };
 const resetpwd = async (req, res) => {
   const { password, id, token } = req.body;
+  // Additional checks
+  if (!id || !token) {
+    return res.status(404).json({ success: false, message: "Invalid Session" });
+  }
+
   const user = await usersModel.findById({ _id: id });
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  const secret = "hero" + user.password;
+
+  const secret = process.env.JWT_SECRET_KEY + user.password;
   try {
-    const payload = jwt.verify(token, secret);
-    if(!payload){
-        return res.status(404).json({ message: "Invalid Token", success: false });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const updated = await usersModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { password: hashedPassword } }
-    );
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ message: "Request Failed", success: false });
-    }
-    res.status(200).json({success:true,message:"Password Changed"});
+    jwt.verify(token, secret, async (err, decoded) => {
+      if (err) {
+        return res
+          .status(404)
+          .json({ message: "Token Expired", success: false });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const updated = await usersModel.findByIdAndUpdate(
+        { _id: id },
+        { $set: { password: hashedPassword } }
+      );
+      if (!updated) {
+        return res
+          .status(404)
+          .json({ message: "Request Failed", success: false });
+      }
+      res.status(200).json({ success: true, message: "Password Changed" });
+    });
   } catch (error) {
-    return res.status(404).json({ message: error.message, success: false });
+    return res.status(404).json({ message: "Token Expired", success: false });
   }
 };
 
