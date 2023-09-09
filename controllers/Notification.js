@@ -55,3 +55,11 @@ export const deleteOld = async (req, res) => {
       .json({ success: false, message: "Failed to delete !" });
   }
 };
+export const getNotifications = async (req,res) => {
+  const { _id } = req.body;
+  const notifications = await notificationModel.find({ userID: _id });
+  if(notifications.length==0){
+    return res.status(404).json({success:false,message:"No Notifications"});
+  }
+  res.status(200).json({success:true,notifications});
+};
