@@ -79,7 +79,7 @@ export const sendResetMail = (name, date, from, pass, recipient, sub, link) => {
     }
   });
 };
-export const forgotpwd = async (req, res) => {
+const forgotpwd = async (req, res) => {
   const { email } = req.body;
   const user = await usersModel.findOne({ email });
   if (!user) {
@@ -103,28 +103,29 @@ export const forgotpwd = async (req, res) => {
   );
   res.status(200).json({ success: true, message: "Check your mail" });
 };
-export const resetpwd = async (req, res) => {
+const resetpwd = async (req, res) => {
   const { password, id, token } = req.body;
   const user = await usersModel.findById({ _id: id });
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  const secret = "hero" + user.password;
-  try {
-    const payload = jwt.verify(token, secret);
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const updated = await usersModel.updateOne(
-      { _id: id },
-      { $set: { password: hashedPassword } }
-    );
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ message: "Request Failed", success: false });
-    }
-  } catch (error) {
-    return res.status(404).json({ message: error.message, success: false });
-  }
+  res.status(200).json({ success: false, message: "ok" });
+//   const secret = "hero" + user.password;
+//   try {
+//     const payload = jwt.verify(token, secret);
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const updated = await usersModel.updateOne(
+//       { _id: id },
+//       { $set: { password: hashedPassword } }
+//     );
+//     if (!updated) {
+//       return res
+//         .status(404)
+//         .json({ message: "Request Failed", success: false });
+//     }
+//   } catch (error) {
+//     return res.status(404).json({ message: error.message, success: false });
+//   }
 };
 
 app.get("/", (req, res) => {
