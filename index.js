@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import cors from "cors";
+import nodemailer from "nodemailer";
 
 const app = express();
 app.use(express.json());
