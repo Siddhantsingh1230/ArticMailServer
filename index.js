@@ -1,9 +1,21 @@
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: [
+      process.env.FRONTEND_URI,
+      "http://localhost:5000",
+      "http://localhost:3000",
+    ],
+    method: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true,
+  })
+);
 const usersSchema = new mongoose.Schema({
   firstname: {
     type: String,
@@ -60,9 +72,9 @@ export const forgotpwd = async (req, res) => {
 };
 export const resetpwd = async (req, res) => {};
 
-app.get("/",(req,res)=>{
-    res.send("service online");
-})
+app.get("/", (req, res) => {
+  res.send("service online");
+});
 app.post("/forgotpassword", forgotpwd);
 app.post("/resetpassword", resetpwd);
 
