@@ -109,23 +109,23 @@ const resetpwd = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  res.status(200).json({ success: false, message: "ok" });
-//   const secret = "hero" + user.password;
-//   try {
-//     const payload = jwt.verify(token, secret);
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     const updated = await usersModel.updateOne(
-//       { _id: id },
-//       { $set: { password: hashedPassword } }
-//     );
-//     if (!updated) {
-//       return res
-//         .status(404)
-//         .json({ message: "Request Failed", success: false });
-//     }
-//   } catch (error) {
-//     return res.status(404).json({ message: error.message, success: false });
-//   }
+  const secret = "hero" + user.password;
+  try {
+    const payload = jwt.verify(token, secret);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updated = await usersModel.findByIdAndUpdate(
+      { _id: id },
+      { $set: { password: hashedPassword } }
+    );
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ message: "Request Failed", success: false });
+    }
+    res.status(200).json({success:true,message:"Password Changed"});
+  } catch (error) {
+    return res.status(404).json({ message: error.message, success: false });
+  }
 };
 
 app.get("/", (req, res) => {
